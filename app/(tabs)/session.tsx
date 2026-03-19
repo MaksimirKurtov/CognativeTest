@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { Screen } from '@/components/ui/screen';
 import ReactionTimeTest from '@/components/tests/reaction-time';
 import StroopTest from '@/components/tests/stroop';
 import DigitSpanTest from '@/components/tests/digit-span';
@@ -9,12 +10,13 @@ import WordRecallTest from '@/components/tests/word-recall';
 import type { TestResult } from '@/types';
 import { beginSession, completeSession, getUserProfile, initializeDatabase, upsertUserProfile } from '@/lib/storage';
 import { useRouter } from 'expo-router';
+import * as Haptics from 'expo-haptics';
 
 export default function SessionScreen() {
   const router = useRouter();
   const tests = ['reaction_time','stroop','digit_span','word_recall'] as const;
   const totalSteps = tests.length + 1; // + questionnaire
-  const [step, setStep] = useState<'intro'|'test'|'questionnaire'|'summary'>('intro');
+  const [step, setStep] = useState<'intro'|'instructions'|'test'|'questionnaire'|'summary'>('intro');
   const [testIndex, setTestIndex] = useState(0);
   const [results, setResults] = useState<TestResult[]>([]);
   const [ready, setReady] = useState(false);
@@ -78,7 +80,7 @@ export default function SessionScreen() {
   }, [step, testIndex]);
 
   const startSession = () => {
-    setStep('test');
+    setStep('instructions');
     setTestIndex(0);
   };
 
@@ -143,9 +145,28 @@ export default function SessionScreen() {
     if (key === 'word_recall') return <><ThemedView style={styles.container}>{indicator}</ThemedView><WordRecallTest onComplete={onCompleteTest} /></>;
   }
 
-  if (step === 'questionnaire') {
+  if (step === 'instructions') {
+    const key = tests[testIndex];
+    const title = labelForTest(key);
+    const desc = instructionsForTest(key);
     return (
       <ThemedView style={styles.container}>
+        <ThemedView style={styles.progressWrap}>
+          <ThemedView style={[styles.progressBar, { width: `${progress * 100}%` }]} />
+          <ThemedText style={styles.progressText}>Up next</ThemedText>
+        </ThemedView>
+        <ThemedText type="title" style={styles.title}>{title}</ThemedText>
+        <ThemedText style={styles.subtitle}>{desc}</ThemedText>
+        <Pressable onPress={async () => { await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); setStep('test'); }} style={[styles.btn, { marginTop: 16 }]}>
+          <ThemedText style={styles.btnText}>Start {title}</ThemedText>
+        </Pressable>
+      </ThemedView>
+    );
+  }
+
+  if (step === 'questionnaire') {
+    return (
+      <Screen>
         <ThemedView style={styles.progressWrap}>
           <ThemedView style={[styles.progressBar, { width: `${progress * 100}%` }]} />
           <ThemedText style={styles.progressText}>Questionnaire</ThemedText>
@@ -217,43 +238,43 @@ export default function SessionScreen() {
         <FieldLabel text="Notes (optional)" />
         <TextInput placeholder="Anything notable about today…" value={questionnaire.notes} onChangeText={t => setQuestionnaire({ ...questionnaire, notes: t })} placeholderTextColor="#888" style={[styles.input, { minHeight: 80 }]} multiline />
 
-        <Pressable onPress={onSave} style={[styles.btn, { marginTop: 16 }]} disabled={saving}>
+        <Pressable onPress={async () => { await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); onSave(); }} style={[styles.btn, { marginTop: 16 }]} disabled={saving}>
           <ThemedText style={styles.btnText}>{saving ? 'Saving…' : 'Save Session'}</ThemedText>
         </Pressable>
-      </ThemedView>
+      </Screen>
     );
   }
 
   if (step === 'summary') {
     const items = results.map(r => `${r.testType}: ${Math.round(r.score)}`).join('\n');
     return (
-      <ThemedView style={styles.container}>
+      <Screen>
         <ThemedText type="title" style={styles.title}>Session Summary</ThemedText>
         <ThemedText style={styles.subtitle}>{items}</ThemedText>
         <View style={{ flexDirection: 'row', gap: 12 }}>
-          <Pressable onPress={() => router.replace('/(tabs)')} style={[styles.btn, { flex: 1 }]}>
+          <Pressable onPress={async () => { await Haptics.selectionAsync(); router.replace('/(tabs)'); }} style={[styles.btn, { flex: 1 }]}>
             <ThemedText style={styles.btnText}>Go to Dashboard</ThemedText>
           </Pressable>
-          <Pressable onPress={() => router.replace('/(tabs)/results')} style={[styles.btnOutline, { flex: 1 }]}>
+          <Pressable onPress={async () => { await Haptics.selectionAsync(); router.replace('/(tabs)/results'); }} style={[styles.btnOutline, { flex: 1 }]}>
             <ThemedText style={styles.btnTextAlt}>View Results</ThemedText>
           </Pressable>
         </View>
-      </ThemedView>
+      </Screen>
     );
   }
 
   return (
-    <ThemedView style={styles.container}>
+    <Screen>
       <ThemedText type="title" style={styles.title}>Full Session</ThemedText>
       <ThemedText style={styles.subtitle}>Runs 4 tests in sequence, then a quick questionnaire.</ThemedText>
       <ThemedView style={styles.progressWrap}>
         <ThemedView style={[styles.progressBar, { width: `${progress * 100}%` }]} />
         <ThemedText style={styles.progressText}>Ready</ThemedText>
       </ThemedView>
-      <Pressable onPress={startSession} style={[styles.btn, { marginTop: 16 }]}>
+      <Pressable onPress={async () => { await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); startSession(); }} style={[styles.btn, { marginTop: 16 }]}>
         <ThemedText style={styles.btnText}>Start Full Session</ThemedText>
       </Pressable>
-    </ThemedView>
+    </Screen>
   );
 }
 
@@ -300,6 +321,28 @@ function ChipRow({ value, onChange }: { value: number; onChange: (v: number) => 
       })}
     </View>
   );
+}
+
+function labelForTest(key: 'reaction_time'|'stroop'|'digit_span'|'word_recall') {
+  switch (key) {
+    case 'reaction_time': return 'Reaction Time';
+    case 'stroop': return 'Stroop';
+    case 'digit_span': return 'Digit Span';
+    case 'word_recall': return 'Word Recall';
+  }
+}
+
+function instructionsForTest(key: 'reaction_time'|'stroop'|'digit_span'|'word_recall') {
+  switch (key) {
+    case 'reaction_time':
+      return 'Wait until the screen turns green, then tap as quickly as you can. 5 trials.';
+    case 'stroop':
+      return 'Tap the actual ink color of the word, not the word itself. Time-limited.';
+    case 'digit_span':
+      return 'Memorize the digits shown, then enter them back in order. Length increases over time.';
+    case 'word_recall':
+      return 'Study the words for a short time, then recall as many as you can within the time.';
+  }
 }
 
 function ToggleRow({ value, onChange }: { value: boolean; onChange: (v: boolean) => void }) {

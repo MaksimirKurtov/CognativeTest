@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import type { TestResult } from '@/types';
+import * as Haptics from 'expo-haptics';
 
 type Props = { onComplete: (result: TestResult) => void };
 
@@ -13,11 +14,19 @@ export default function WordRecallTest({ onComplete }: Props) {
   const [words, setWords] = useState<string[]>(() => pickWords(8));
   const [input, setInput] = useState('');
   const [timer, setTimer] = useState(10);
+  const [recallTimer, setRecallTimer] = useState(30);
 
   useEffect(() => {
     if (phase !== 'study') return;
     const id = setInterval(() => setTimer(t => (t <= 1 ? 0 : t - 1)), 1000);
     const to = setTimeout(() => setPhase('recall'), 10000);
+    return () => { clearInterval(id); clearTimeout(to); };
+  }, [phase]);
+
+  useEffect(() => {
+    if (phase !== 'recall') return;
+    const id = setInterval(() => setRecallTimer(t => (t <= 1 ? 0 : t - 1)), 1000);
+    const to = setTimeout(() => submit(), 30000);
     return () => { clearInterval(id); clearTimeout(to); };
   }, [phase]);
 
@@ -49,7 +58,7 @@ export default function WordRecallTest({ onComplete }: Props) {
           </>
         ) : (
           <>
-            <ThemedText style={styles.meta}>Type as many as you remember</ThemedText>
+            <ThemedText style={styles.meta}>Type as many as you remember ({recallTimer}s)</ThemedText>
             <TextInput
               autoFocus
               multiline
@@ -59,13 +68,13 @@ export default function WordRecallTest({ onComplete }: Props) {
               placeholderTextColor="#888"
               style={styles.input}
             />
-            <Pressable onPress={submit} style={styles.btn}><ThemedText style={styles.btnText}>Submit</ThemedText></Pressable>
+            <Pressable onPress={async () => { await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); submit(); }} style={styles.btn}><ThemedText style={styles.btnText}>Submit</ThemedText></Pressable>
           </>
         )}
       </ThemedView>
     </ThemedView>
   );
-}
+} 
 
 function pickWords(n: number) {
   const shuffled = [...WORD_BANK].sort(() => Math.random() - 0.5);

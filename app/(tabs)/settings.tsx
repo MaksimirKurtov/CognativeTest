@@ -1,6 +1,7 @@
 import { Alert, StyleSheet, TextInput, View } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { Screen } from '@/components/ui/screen';
 import { Link } from 'expo-router';
 import Constants from 'expo-constants';
 import { getUserProfile, initializeDatabase, setQuitDate } from '@/lib/storage';
@@ -45,7 +46,7 @@ export default function SettingsScreen() {
   };
 
   return (
-    <ThemedView style={styles.container}>
+    <Screen>
       <ThemedText type="title" style={styles.title}>Settings</ThemedText>
       <ThemedText style={styles.subtitle}>Manage your app preferences and data</ThemedText>
       <Link href="/(tabs)/setup" style={styles.link}>Edit Setup</Link>
@@ -72,7 +73,7 @@ export default function SettingsScreen() {
         <ThemedText style={styles.sectionTitle}>About</ThemedText>
         <ThemedText>Version: {Constants?.expoConfig?.version ?? '1.0.0'}</ThemedText>
       </ThemedView>
-    </ThemedView>
+    </Screen>
   );
 }
 

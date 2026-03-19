@@ -5,6 +5,8 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { getUserProfile, initializeDatabase, upsertUserProfile, markSetupComplete } from '@/lib/storage';
+import { Screen } from '@/components/ui/screen';
+import * as Haptics from 'expo-haptics';
 
 type Frequency = 'less_than_weekly' | 'few_times_week' | 'daily' | 'multiple_per_day';
 type TimeOfDay = 'morning' | 'afternoon' | 'evening' | 'night' | 'varied';
@@ -57,16 +59,10 @@ export default function SetupScreen() {
     }
   };
 
-  if (loading) {
-    return (
-      <ThemedView style={styles.container}>
-        <ThemedText>Loading…</ThemedText>
-      </ThemedView>
-    );
-  }
+  if (loading) return <Screen><ThemedText>Loading…</ThemedText></Screen>;
 
   return (
-    <ThemedView style={styles.container}>
+    <Screen>
       <ThemedText type="title" style={styles.title}>Setup</ThemedText>
       <ThemedText style={styles.subtitle}>Tell us about your current usage</ThemedText>
 
@@ -150,10 +146,10 @@ export default function SetupScreen() {
         </View>
       </View>
 
-      <Pressable onPress={onSave} style={({ pressed }) => [styles.primaryBtn, pressed && { opacity: 0.9 }]}>
+      <Pressable onPress={async () => { await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); onSave(); }} style={({ pressed }) => [styles.primaryBtn, pressed && { opacity: 0.9 }]}>
         <ThemedText style={styles.primaryBtnText}>Save and Continue</ThemedText>
       </Pressable>
-    </ThemedView>
+    </Screen>
   );
 }
 

@@ -4,6 +4,8 @@ import { Link } from 'expo-router';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { getLatestResultForTest, getUserProfile, initializeDatabase } from '@/lib/storage';
+import { Screen } from '@/components/ui/screen';
+import * as Haptics from 'expo-haptics';
 
 export default function TestsScreen() {
   const [scores, setScores] = useState<Record<string, number | null>>({});
@@ -33,7 +35,7 @@ export default function TestsScreen() {
   ];
 
   return (
-    <ThemedView style={styles.container}>
+    <Screen>
       <ThemedText type="title" style={styles.title}>Tests</ThemedText>
       <ThemedText style={styles.subtitle}>Choose a test to begin</ThemedText>
       {items.map(it => (
@@ -41,14 +43,14 @@ export default function TestsScreen() {
           key={it.key}
           href={{ pathname: '/tests/[slug]', params: { slug: it.key } }}
           asChild>
-          <Pressable style={({ pressed }) => [styles.card, pressed && { opacity: 0.95 }] }>
+          <Pressable onPress={() => Haptics.selectionAsync()} style={({ pressed }) => [styles.card, pressed && { opacity: 0.95 }] }>
             <ThemedText style={styles.cardTitle}>{it.title}</ThemedText>
             <ThemedText style={styles.cardDesc}>{it.desc}</ThemedText>
             <ThemedText style={styles.cardMeta}>Latest: {scores[it.key] ?? '—'}</ThemedText>
           </Pressable>
         </Link>
       ))}
-    </ThemedView>
+    </Screen>
   );
 }
 

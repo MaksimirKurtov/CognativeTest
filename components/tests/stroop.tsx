@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import * as Haptics from 'expo-haptics';
 import type { TestResult } from '@/types';
 
 const COLORS = [
@@ -19,6 +20,7 @@ export default function StroopTest({ onComplete }: Props) {
   const [rtList, setRtList] = useState<number[]>([]);
   const startedAt = useRef<number>(Date.now());
   const [current, setCurrent] = useState<{ word: string; color: string }>(() => nextStim());
+  const [endTime] = useState(Date.now() + 30000); // 30s time-based
 
   useEffect(() => {
     startedAt.current = Date.now();
@@ -47,10 +49,13 @@ export default function StroopTest({ onComplete }: Props) {
     const rt = Date.now() - startedAt.current;
     setCorrect(c => c + (isCorrect ? 1 : 0));
     setRtList(list => [...list, rt]);
-    if (trial + 1 >= 10) {
-      const finalCorrect = isCorrect ? correct + 1 : correct;
-      const accuracy = Math.round((finalCorrect / 10) * 100);
-      const avgRt = Math.round(rtList.concat([rt]).reduce((a, b) => a + b, 0) / 10);
+    Haptics.selectionAsync();
+    const now = Date.now();
+    const finalCorrect = isCorrect ? correct + 1 : correct;
+    if (now >= endTime) {
+      const total = rtList.concat([rt]).length;
+      const accuracy = Math.round((finalCorrect / total) * 100);
+      const avgRt = Math.round(rtList.concat([rt]).reduce((a, b) => a + b, 0) / total);
       const result: TestResult = {
         testType: 'stroop',
         score: accuracy,

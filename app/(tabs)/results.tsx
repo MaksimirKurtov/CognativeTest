@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { Screen } from '@/components/ui/screen';
 import { getTestSessions, getUserProfile, initializeDatabase } from '@/lib/storage';
 import type { TestSession } from '@/types';
 
@@ -53,7 +54,7 @@ export default function ResultsScreen() {
   }
 
   return (
-    <ThemedView style={styles.container}>
+    <Screen>
       <ThemedText type="title" style={styles.title}>Results</ThemedText>
       <ThemedText style={styles.subtitle}>Baseline vs recovery and recent activity</ThemedText>
 
@@ -107,7 +108,7 @@ export default function ResultsScreen() {
           </View>
         ))}
       </ThemedView>
-    </ThemedView>
+    </Screen>
   );
 }
 

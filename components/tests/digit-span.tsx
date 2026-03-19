@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import type { TestResult } from '@/types';
+import * as Haptics from 'expo-haptics';
 
 type Props = { onComplete: (result: TestResult) => void };
 
@@ -18,6 +19,7 @@ export default function DigitSpanTest({ onComplete }: Props) {
   const [best, setBest] = useState(0);
   const [correctRounds, setCorrectRounds] = useState(0);
   const [mistakes, setMistakes] = useState(0);
+  const [endTime] = useState(Date.now() + 60000);
 
   useEffect(() => {
     const t = setTimeout(() => setPhase('input'), Math.min(4000, 1000 + length * 500));
@@ -36,7 +38,7 @@ export default function DigitSpanTest({ onComplete }: Props) {
     } else {
       const m = mistakes + 1;
       setMistakes(m);
-      if (m >= 2) {
+      if (m >= 2 || Date.now() >= endTime) {
         const result: TestResult = {
           testType: 'digit_span',
           score: best,

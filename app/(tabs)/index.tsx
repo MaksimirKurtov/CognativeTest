@@ -6,6 +6,8 @@ import { ThemedView } from '@/components/themed-view';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Link } from 'expo-router';
 import { getLatestSession, getTestSessions, getUserProfile, initializeDatabase, setQuitDate } from '@/lib/storage';
+import { Screen } from '@/components/ui/screen';
+import * as Haptics from 'expo-haptics';
 
 export default function HomeScreen() {
   const [profile, setProfile] = useState<any | null>(null);
@@ -50,7 +52,7 @@ export default function HomeScreen() {
   const weeksInto = profile?.smokingHistory?.weeksSmoking;
 
   return (
-    <ThemedView style={styles.container}>
+    <Screen>
       <ThemedView style={styles.header}>
         <ThemedText type="title">Cognitive Test</ThemedText>
         <ThemedText style={styles.subtitle}>Track your cognitive performance and quitting journey</ThemedText>
@@ -60,7 +62,7 @@ export default function HomeScreen() {
         <ThemedText type="subtitle">Quick Actions</ThemedText>
 
         <Link href="/(tabs)/session" asChild>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)}>
             <ThemedView style={styles.actionCard} lightColor="#f1f3f5" darkColor="#1e1f22">
               <IconSymbol name="play.circle.fill" size={32} color="#4da3ff" />
               <ThemedText style={styles.actionTitle}>Start Session</ThemedText>
@@ -70,7 +72,7 @@ export default function HomeScreen() {
         </Link>
 
         <Link href="/(tabs)/tests" asChild>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)}>
             <ThemedView style={styles.actionCard} lightColor="#f1f3f5" darkColor="#1e1f22">
               <IconSymbol name="brain.head.profile" size={32} color="#ffcc66" />
               <ThemedText style={styles.actionTitle}>Open Tests</ThemedText>
@@ -80,7 +82,7 @@ export default function HomeScreen() {
         </Link>
 
         <Link href="/(tabs)/setup" asChild>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)}>
             <ThemedView style={styles.actionCard} lightColor="#f1f3f5" darkColor="#1e1f22">
               <IconSymbol name="person.crop.circle.fill" size={32} color="#2ad36b" />
               <ThemedText style={styles.actionTitle}>Setup Profile</ThemedText>
@@ -136,6 +138,7 @@ export default function HomeScreen() {
       {!profile?.smokingHistory?.quitDate && (
         <Pressable
           onPress={async () => {
+            await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
             await setQuitDate(new Date());
             const updated = await getUserProfile();
             setProfile(updated);
@@ -145,7 +148,7 @@ export default function HomeScreen() {
         </Pressable>
       )}
 
-    </ThemedView>
+    </Screen>
   );
 }
 
