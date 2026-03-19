@@ -85,7 +85,7 @@ const styles = StyleSheet.create({
   card: { padding: 20, borderRadius: 12, marginTop: 12 },
   title: { fontSize: 20, fontWeight: '700' },
   meta: { marginTop: 8, opacity: 0.8 },
-  sequence: { marginTop: 24, fontSize: 32, letterSpacing: 4, textAlign: 'center' },
+  sequence: { marginTop: 24, fontSize: 32, lineHeight: 40, letterSpacing: 4, textAlign: 'center' },
   input: { marginTop: 16, padding: 12, backgroundColor: '#1e1f22', borderRadius: 8, color: '#fff', minWidth: 220 },
   btn: { marginTop: 12, backgroundColor: '#2d6cdf', paddingVertical: 12, alignItems: 'center', borderRadius: 10 },
   btnText: { color: '#fff', fontWeight: '600' },

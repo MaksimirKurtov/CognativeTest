@@ -80,6 +80,6 @@ const styles = StyleSheet.create({
   ready: { backgroundColor: '#1e1f22' },
   wait: { backgroundColor: '#8b2d2d' },
   go: { backgroundColor: '#1f6f3b' },
-  title: { fontSize: 24, fontWeight: '700', marginBottom: 8 },
+  title: { fontSize: 24, lineHeight: 30, fontWeight: '700', marginBottom: 8 },
   subtitle: { fontSize: 14, opacity: 0.9 },
 });

@@ -89,7 +89,7 @@ export default function StroopTest({ onComplete }: Props) {
 
 const styles = StyleSheet.create({
   promptBox: { padding: 24, borderRadius: 12, alignItems: 'center', marginTop: 12 },
-  word: { fontSize: 36, fontWeight: '800' },
+  word: { fontSize: 36, lineHeight: 44, fontWeight: '800' },
   meta: { marginTop: 8, opacity: 0.8 },
   choices: { marginTop: 24, gap: 12 },
   choice: { paddingVertical: 14, alignItems: 'center', borderRadius: 10 },
